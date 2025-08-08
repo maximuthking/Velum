@@ -1,15 +1,16 @@
-// 파일 경로: src/components/ui/FishingUI.tsx
+// 파일 경로: src/components/ui/FishingUI.tsx (수정된 파일)
 
 import { useState, useEffect, useRef } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { isFishingAtom, fishingResultAtom } from '../../store/gameStore';
-import { playerGoldAtom } from '../../store/playerStore';
+import { fishInventoryAtom } from '../../store/playerStore';
+import { getRandomFish } from '../../data/fishData';
 import './FishingUI.css';
 
 export const FishingUI = () => {
   const [isFishing, setIsFishing] = useAtom(isFishingAtom);
   const setFishingResult = useSetAtom(fishingResultAtom);
-  const setPlayerGold = useSetAtom(playerGoldAtom);
+  const setFishInventory = useSetAtom(fishInventoryAtom);
 
   const [indicatorPosition, setIndicatorPosition] = useState(0);
   const [successZone, setSuccessZone] = useState({ start: 0, width: 0 });
@@ -17,10 +18,11 @@ export const FishingUI = () => {
   const indicatorPositionRef = useRef(0);
   const direction = useRef(1);
   const speed = 150;
+  const hasCaught = useRef(false); // 물고기를 잡았는지 여부를 체크하는 Ref
 
   useEffect(() => {
     if (isFishing) {
-      // 미니게임 시작 시 성공 영역을 한 번만 설정합니다.
+      hasCaught.current = false; // 낚시 시작 시 초기화
       const width = 50 + Math.random() * 50;
       const start = Math.random() * (400 - width);
       setSuccessZone({ start, width });
@@ -51,23 +53,31 @@ export const FishingUI = () => {
 
       const handleKeyPress = (e: KeyboardEvent) => {
         if (e.code === 'Space') {
+          // 이미 물고기를 잡았다면 더 이상 진행하지 않음
+          if (hasCaught.current) return;
+          hasCaught.current = true; // 잡기 시도 시 즉시 잠금
+
           cancelAnimationFrame(animationFrameId);
           
           const finalPos = indicatorPositionRef.current;
           
-          // successZone state는 이 effect 스코프가 생성될 때의 값을 참조하므로,
-          // 최신 값을 사용하기 위해 state 업데이트 함수 내부에서 접근합니다.
           setSuccessZone(currentZone => {
             if (finalPos >= currentZone.start && finalPos <= currentZone.start + currentZone.width) {
-              setFishingResult('success');
-              setPlayerGold((prev) => prev + 10);
-              console.log("낚시 성공! +10 Gold");
+              const caughtFish = getRandomFish();
+              setFishingResult(`잡았다! (${caughtFish.name})`);
+              setFishInventory(prevInventory => {
+                const newInventory = new Map(prevInventory);
+                const currentCount = newInventory.get(caughtFish.name) || 0;
+                newInventory.set(caughtFish.name, currentCount + 1);
+                return newInventory;
+              });
+              console.log(`낚시 성공! ${caughtFish.name} 1마리 획득!`);
             } else {
               setFishingResult('fail');
               console.log("낚시 실패!");
             }
             setIsFishing(false);
-            return currentZone; // 상태는 변경하지 않음
+            return currentZone;
           });
         }
       };
@@ -78,7 +88,7 @@ export const FishingUI = () => {
         cancelAnimationFrame(animationFrameId);
       };
     }
-  }, [isFishing, setIsFishing, setFishingResult, setPlayerGold]); // 의존성 배열에서 successZone 관련 값을 제거했습니다.
+  }, [isFishing, setIsFishing, setFishingResult, setFishInventory]);
 
   if (!isFishing) return null;
 

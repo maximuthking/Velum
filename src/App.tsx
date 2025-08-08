@@ -1,46 +1,22 @@
-// 파일 경로: src/App.tsx
+// 파일 경로: src/App.tsx (수정된 파일)
 
 import React, { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { Ship } from './components/Ship';
-import { useAtom, useSetAtom, useAtomValue } from 'jotai';
-import { shipHealthAtom } from './store/shipStore';
-import { isFishingAtom, fishingResultAtom } from './store/gameStore';
-import { playerGoldAtom } from './store/playerStore';
-import { Physics, RapierRigidBody, CuboidCollider, RigidBody } from '@react-three/rapier'; // RigidBody import 추가
+import { useSetAtom, useAtomValue } from 'jotai';
+import { isFishingAtom, fishingResultAtom, isInventoryOpenAtom } from './store/gameStore';
+import { Physics, RapierRigidBody, CuboidCollider, RigidBody } from '@react-three/rapier';
 import { Rock } from './components/Rock';
 import { FishingUI } from './components/ui/FishingUI';
 import { PlayerUI } from './components/ui/PlayerUI';
 import { World } from './components/World';
 import { Environment } from './components/Environment';
 import { Ocean } from './components/Water';
-
-// 게임 액션 컨트롤러 (수리 로직)
-const GameActionsController = () => {
-  const [shipHealth, setShipHealth] = useAtom(shipHealthAtom);
-  const [playerGold, setPlayerGold] = useAtom(playerGoldAtom);
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.code === 'KeyR') {
-        const repairCost = 100 - shipHealth;
-        if (playerGold >= repairCost) {
-          setShipHealth(100);
-          setPlayerGold((prev) => prev - repairCost);
-          console.log(`Ship repaired! -${repairCost} Gold`);
-        } else {
-          console.log("골드가 부족합니다!");
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [shipHealth, setShipHealth, playerGold, setPlayerGold]);
-
-  return null;
-};
+import { Harbor } from './components/Harbor';
+import { HarborUI } from './components/ui/HarborUI';
+import { InventoryUI } from './components/ui/InventoryUI';
 
 // 낚시 시작 컨트롤러
 const FishingController = () => {
@@ -62,6 +38,22 @@ const FishingController = () => {
   return null;
 };
 
+// 인벤토리 컨트롤러
+const InventoryController = () => {
+  const setIsOpen = useSetAtom(isInventoryOpenAtom);
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.code === 'KeyI') {
+        setIsOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [setIsOpen]);
+  return null;
+};
+
+
 // 낚시 결과 텍스트
 const FishingResultText = ({ target }: { target: React.RefObject<RapierRigidBody> }) => {
   const result = useAtomValue(fishingResultAtom);
@@ -70,7 +62,11 @@ const FishingResultText = ({ target }: { target: React.RefObject<RapierRigidBody
 
   useEffect(() => {
     if (result) {
-      setText(result === 'success' ? '잡았다!' : '놓쳤다...');
+      if(result === 'fail') {
+        setText('놓쳤다...');
+      } else {
+        setText(result);
+      }
       setVisible(true);
       const timer = setTimeout(() => setVisible(false), 2000);
       return () => clearTimeout(timer);
@@ -83,7 +79,7 @@ const FishingResultText = ({ target }: { target: React.RefObject<RapierRigidBody
 
   return (
     <Html position={[position.x, position.y + 2, position.z]}>
-      <div style={{ color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px 10px', borderRadius: '5px' }}>
+      <div style={{ color: 'white', background: 'rgba(0,0,0,0.5)', padding: '5px 10px', borderRadius: '5px', whiteSpace: 'nowrap' }}>
         {text}
       </div>
     </Html>
@@ -118,11 +114,12 @@ const GameCamera = ({ target }: { target: React.RefObject<RapierRigidBody> }) =>
 // 씬 컴포넌트
 const Scene = () => {
   const shipRef = useRef<RapierRigidBody>(null!);
+  const lightRef = useRef<THREE.DirectionalLight>(null!);
 
   return (
     <>
-      <Environment targetRef={shipRef} />
-      <Ocean />
+      <Environment lightRef={lightRef} targetRef={shipRef} />
+      <Ocean lightRef={lightRef} />
       
       <Physics>
         <RigidBody type="fixed" colliders={false}>
@@ -131,6 +128,7 @@ const Scene = () => {
         
         <Ship ref={shipRef} />
         <World />
+        <Harbor position={[-10, 0, -10]} />
 
         <Rock position={[0, 0, -20]} />
         <Rock position={[10, 0, -30]} />
@@ -138,8 +136,8 @@ const Scene = () => {
       </Physics>
       
       <GameCamera target={shipRef} />
-      <GameActionsController />
       <FishingController />
+      <InventoryController />
       <FishingResultText target={shipRef} />
     </>
   );
@@ -151,6 +149,8 @@ const GameUI = () => {
     <>
       <PlayerUI />
       <FishingUI />
+      <HarborUI />
+      <InventoryUI />
     </>
   )
 }

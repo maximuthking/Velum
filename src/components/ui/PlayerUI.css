@@ -1,4 +1,4 @@
-/* 파일 경로: src/components/ui/PlayerUI.css (새 파일) */
+/* 파일 경로: src/components/ui/PlayerUI.css (수정된 파일) */
 
 .player-ui-container {
   position: absolute;
@@ -11,4 +11,12 @@
   font-family: sans-serif;
   font-size: 18px;
   border: 2px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fish-count {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 5px;
 }

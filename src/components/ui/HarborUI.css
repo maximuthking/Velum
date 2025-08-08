@@ -1,0 +1,56 @@
+/* 파일 경로: src/components/ui/HarborUI.css (새 파일) */
+
+.harbor-ui-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 280px;
+  background-color: rgba(40, 30, 20, 0.8);
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  color: #f0e0d0;
+  font-family: 'Georgia', serif;
+  border: 2px solid #a08060;
+  text-align: center;
+}
+
+.harbor-ui-container h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #fff;
+  font-size: 24px;
+  border-bottom: 1px solid #a08060;
+  padding-bottom: 10px;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.button-group button {
+  padding: 10px 15px;
+  background-color: #705030;
+  border: 2px solid #a08060;
+  color: #f0e0d0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+.button-group button:hover {
+  background-color: #907050;
+}
+
+.button-group button:active {
+  transform: translateY(1px);
+}
+
+.message-text {
+  margin-top: 15px;
+  color: #ffddaa;
+  font-style: italic;
+}
