@@ -1,19 +1,21 @@
-// 파일 경로: src/App.tsx (수정된 파일)
+// 파일 경로: src/App.tsx
 
 import React, { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Sky, Html } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { Ship } from './components/Ship';
 import { useAtom, useSetAtom, useAtomValue } from 'jotai';
 import { shipHealthAtom } from './store/shipStore';
 import { isFishingAtom, fishingResultAtom } from './store/gameStore';
 import { playerGoldAtom } from './store/playerStore';
-import { Physics, RapierRigidBody } from '@react-three/rapier';
+import { Physics, RapierRigidBody, CuboidCollider, RigidBody } from '@react-three/rapier'; // RigidBody import 추가
 import { Rock } from './components/Rock';
 import { FishingUI } from './components/ui/FishingUI';
 import { PlayerUI } from './components/ui/PlayerUI';
-import { World } from './components/World'; // World 컴포넌트 import
+import { World } from './components/World';
+import { Environment } from './components/Environment';
+import { Ocean } from './components/Water';
 
 // 게임 액션 컨트롤러 (수리 로직)
 const GameActionsController = () => {
@@ -113,49 +115,29 @@ const GameCamera = ({ target }: { target: React.RefObject<RapierRigidBody> }) =>
   return null;
 }
 
-// 그림자 컨트롤러 컴포넌트
-const ShadowController = ({ lightRef, targetRef }: { lightRef: React.RefObject<THREE.DirectionalLight>, targetRef: React.RefObject<RapierRigidBody> }) => {
-  useFrame(() => {
-    if (lightRef.current && targetRef.current) {
-      const shipPosition = targetRef.current.translation();
-      lightRef.current.position.x = shipPosition.x + 100;
-      lightRef.current.position.z = shipPosition.z + 50;
-      lightRef.current.target.position.set(shipPosition.x, shipPosition.y, shipPosition.z);
-      lightRef.current.target.updateMatrixWorld();
-    }
-  });
-  
-  return null;
-}
-
 // 씬 컴포넌트
 const Scene = () => {
   const shipRef = useRef<RapierRigidBody>(null!);
-  const lightRef = useRef<THREE.DirectionalLight>(null!);
 
   return (
     <>
-      <Sky sunPosition={[100, 20, 100]} />
-      <ambientLight intensity={1.5} />
-      <directionalLight ref={lightRef} position={[100, 100, 50]} intensity={2} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-left={-50} shadow-camera-right={50} shadow-camera-top={50} shadow-camera-bottom={-50} />
+      <Environment targetRef={shipRef} />
+      <Ocean />
       
       <Physics>
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-          <planeGeometry args={[2000, 2000]} />
-          <meshStandardMaterial color="#0077be" />
-        </mesh>
+        <RigidBody type="fixed" colliders={false}>
+            <CuboidCollider args={[2000, 1, 2000]} position={[0, -1.5, 0]} />
+        </RigidBody>
         
         <Ship ref={shipRef} />
-        <World /> {/* World 컴포넌트 추가 */}
+        <World />
 
         <Rock position={[0, 0, -20]} />
         <Rock position={[10, 0, -30]} />
         <Rock position={[-15, 0, -40]} />
       </Physics>
       
-      <gridHelper args={[2000, 100]} position={[0, -0.49, 0]} />
       <GameCamera target={shipRef} />
-      <ShadowController lightRef={lightRef} targetRef={shipRef} />
       <GameActionsController />
       <FishingController />
       <FishingResultText target={shipRef} />
