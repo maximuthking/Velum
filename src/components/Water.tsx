@@ -23,7 +23,7 @@ export const Ocean = ({ lightRef }: { lightRef: React.RefObject<THREE.Directiona
         waterNormals,
         sunDirection: new THREE.Vector3(),
         sunColor: 0xffffe0,
-        waterColor: 0x00498c,
+        waterColor: 0x00b8d4,
         distortionScale: 2.0, // 물결 왜곡을 줄여 반사를 더 은은하게 만듭니다.
         fog: false,
       }
