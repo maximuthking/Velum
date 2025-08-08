@@ -1,17 +1,27 @@
-// 파일 경로: src/components/models/PlayerShip.tsx
+// 파일 경로: src/components/models/PlayerShip.tsx (수정된 파일)
 
-import React from 'react';
 import * as THREE from 'three';
+import { useAtomValue } from 'jotai';
+import { shipHealthPercentageAtom } from '../../store/shipStore';
 
 // 배의 외형을 담당하는 컴포넌트
 export const PlayerShipModel = () => {
+  // Jotai store에서 현재 내구도 비율을 가져옵니다.
+  const healthPercentage = useAtomValue(shipHealthPercentageAtom);
+
+  // 내구도에 따라 선체의 색상을 결정합니다.
+  const getBodyColor = () => {
+    if (healthPercentage <= 30) return "#4B3621"; // 심각한 손상
+    if (healthPercentage <= 70) return "#6F5E4E"; // 경미한 손상
+    return "#8B4513"; // 정상
+  };
+
   return (
-    // 나중에 이 부분을 gltfjsx로 생성된 컴포넌트로 교체하면 됩니다.
     <group>
         {/* 선체 */}
         <mesh castShadow receiveShadow>
             <boxGeometry args={[1.2, 0.5, 2.5]} />
-            <meshStandardMaterial color="#8B4513" />
+            <meshStandardMaterial color={getBodyColor()} />
         </mesh>
         {/* 갑판 */}
         <mesh castShadow position={[0, 0.25, 0]}>
@@ -26,8 +36,22 @@ export const PlayerShipModel = () => {
         {/* 돛 */}
         <mesh castShadow position={[0, 1.2, 0]}>
             <planeGeometry args={[1, 1]} />
-            <meshStandardMaterial color="white" side={THREE.DoubleSide} />
+            {/* 내구도가 70% 이하일 때 돛에 구멍이 난 것처럼 보이도록 투명하게 만듭니다. */}
+            <meshStandardMaterial 
+              color="white" 
+              side={THREE.DoubleSide} 
+              transparent={healthPercentage <= 70}
+              opacity={healthPercentage <= 70 ? 0.8 : 1}
+            />
         </mesh>
+
+        {/* 심각한 손상 시(30% 이하) 연기 파티클(임시)을 보여줍니다. */}
+        {healthPercentage <= 30 && (
+          <mesh position={[0, 0.5, -1.5]}>
+            <sphereGeometry args={[0.1, 8, 8]} />
+            <meshStandardMaterial color="black" emissive="grey" />
+          </mesh>
+        )}
     </group>
   );
 };
