@@ -13,6 +13,7 @@ import { Physics, RapierRigidBody } from '@react-three/rapier';
 import { Rock } from './components/Rock';
 import { FishingUI } from './components/ui/FishingUI';
 import { PlayerUI } from './components/ui/PlayerUI';
+import { World } from './components/World'; // World 컴포넌트 import
 
 // 게임 액션 컨트롤러 (수리 로직)
 const GameActionsController = () => {
@@ -145,6 +146,7 @@ const Scene = () => {
         </mesh>
         
         <Ship ref={shipRef} />
+        <World /> {/* World 컴포넌트 추가 */}
 
         <Rock position={[0, 0, -20]} />
         <Rock position={[10, 0, -30]} />
