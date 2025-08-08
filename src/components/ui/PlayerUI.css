@@ -1,0 +1,14 @@
+/* 파일 경로: src/components/ui/PlayerUI.css (새 파일) */
+
+.player-ui-container {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 10px 15px;
+  border-radius: 8px;
+  color: white;
+  font-family: sans-serif;
+  font-size: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}

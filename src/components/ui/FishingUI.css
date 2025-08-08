@@ -1,0 +1,43 @@
+
+.fishing-ui-container {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.fishing-bar-background {
+  width: 100%;
+  height: 30px;
+  background-color: #333;
+  border-radius: 5px;
+  margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fishing-bar-success {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background-color: #4caf50; /* Green */
+  border-radius: 5px;
+}
+
+.fishing-bar-indicator {
+  position: absolute;
+  top: -5px;
+  height: 40px;
+  width: 4px;
+  background-color: #f44336; /* Red */
+  box-shadow: 0 0 5px #f44336;
+}
