@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
+import { Html, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { Ship } from './components/Ship';
 import { useSetAtom, useAtomValue } from 'jotai';
@@ -17,6 +17,7 @@ import { Ocean } from './components/Water';
 import { Harbor } from './components/Harbor';
 import { HarborUI } from './components/ui/HarborUI';
 import { InventoryUI } from './components/ui/InventoryUI';
+import { Leva } from 'leva'; // Leva 컴포넌트 import
 
 // 낚시 시작 컨트롤러
 const FishingController = () => {
@@ -86,40 +87,41 @@ const FishingResultText = ({ target }: { target: React.RefObject<RapierRigidBody
   );
 }
 
-// 카메라 컴포넌트
-const GameCamera = ({ target }: { target: React.RefObject<RapierRigidBody> }) => {
-  const [zoom, setZoom] = useState(25);
-
-  useFrame(({ camera }) => {
-    if (target.current) {
-      const shipPosition = target.current.translation();
-      const offset = new THREE.Vector3(0, zoom, zoom * 0.75);
-      const desiredPosition = new THREE.Vector3(shipPosition.x, shipPosition.y, shipPosition.z).add(offset);
-      camera.position.lerp(desiredPosition, 0.1);
-      camera.lookAt(shipPosition.x, shipPosition.y, shipPosition.z);
-    }
-  });
-
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      setZoom(prev => Math.max(15, Math.min(50, prev + e.deltaY * 0.05)));
-    };
-    window.addEventListener('wheel', handleWheel);
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, []);
-  
-  return null;
-}
-
 // 씬 컴포넌트
 const Scene = () => {
   const shipRef = useRef<RapierRigidBody>(null!);
+  const controlsRef = useRef<any>(null!);
   const lightRef = useRef<THREE.DirectionalLight>(null!);
+
+  useFrame((state) => {
+    if (shipRef.current && controlsRef.current && lightRef.current) {
+      const shipPosition = shipRef.current.translation();
+      
+      // 카메라가 배를 따라다니도록 업데이트
+      const offset = new THREE.Vector3().subVectors(state.camera.position, controlsRef.current.target);
+      controlsRef.current.target.copy(shipPosition);
+      state.camera.position.copy(shipPosition).add(offset);
+      controlsRef.current.update();
+
+      // 광원이 배를 따라다니도록 업데이트
+      lightRef.current.position.set(shipPosition.x + 100, shipPosition.y + 150, shipPosition.z + 50);
+      lightRef.current.target.position.copy(shipPosition);
+      lightRef.current.target.updateMatrixWorld();
+    }
+  });
 
   return (
     <>
-      <Environment lightRef={lightRef} targetRef={shipRef} />
+      <Environment lightRef={lightRef} />
       <Ocean lightRef={lightRef} />
+      
+      <OrbitControls 
+        ref={controlsRef}
+        enablePan={false}
+        minDistance={15}
+        maxDistance={50}
+        maxPolarAngle={Math.PI / 2.2}
+      />
       
       <Physics>
         <RigidBody type="fixed" colliders={false}>
@@ -135,7 +137,6 @@ const Scene = () => {
         <Rock position={[-15, 0, -40]} />
       </Physics>
       
-      <GameCamera target={shipRef} />
       <FishingController />
       <InventoryController />
       <FishingResultText target={shipRef} />
@@ -159,6 +160,7 @@ const GameUI = () => {
 function App() {
   return (
     <>
+      <Leva collapsed />
       <Canvas shadows camera={{ position: [0, 30, 30], fov: 50 }}>
         <Suspense fallback={null}>
           <Scene />

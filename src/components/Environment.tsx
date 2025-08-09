@@ -1,18 +1,24 @@
-// 파일 경로: src/components/Environment.tsx
+// 파일 경로: src/components/Environment.tsx (수정된 파일)
 
-import { useEffect } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useRef, useEffect } from 'react';
+import { useThree } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
-import { useAtom } from 'jotai';
-import { timeOfDayAtom } from '../store/gameStore';
-import { RapierRigidBody } from '@react-three/rapier';
+import { useControls } from 'leva';
 
 // 하늘, 조명, 그림자를 모두 관리하는 컴포넌트
-export const Environment = ({ lightRef, targetRef }: { lightRef: React.RefObject<THREE.DirectionalLight>, targetRef: React.RefObject<RapierRigidBody> }) => {
-  const [timeOfDay, setTimeOfDay] = useAtom(timeOfDayAtom);
+export const Environment = ({ lightRef }: { lightRef: React.RefObject<THREE.DirectionalLight> }) => {
   const { scene } = useThree();
 
+  // Leva 컨트롤러를 사용하여 하늘과 빛의 속성을 실시간으로 조절합니다.
+  const { turbidity, rayleigh, sunColor, ambientIntensity } = useControls('Environment Settings', {
+    turbidity: { value: 5, min: 0, max: 20, step: 0.1 },
+    rayleigh: { value: 3, min: 0, max: 10, step: 0.1 },
+    sunColor: '#ffffff',
+    ambientIntensity: { value: 0.8, min: 0, max: 2, step: 0.1 },
+  });
+
+  // light.target을 씬에 추가하여 그림자가 정상적으로 렌더링되도록 합니다.
   useEffect(() => {
     if (lightRef.current) {
       scene.add(lightRef.current.target);
@@ -23,49 +29,33 @@ export const Environment = ({ lightRef, targetRef }: { lightRef: React.RefObject
       }
     }
   }, [scene, lightRef]);
-  
-  useFrame((_, delta) => {
-    // 'prev' 매개 변수에 number 타입을 명시적으로 지정합니다.
-    setTimeOfDay((prev: number) => (prev + delta / 60) % 24);
-
-    if (targetRef.current && lightRef.current) {
-        const shipPosition = targetRef.current.translation();
-        const angle = (timeOfDay / 24) * Math.PI * 2 - Math.PI / 2;
-        const sunX = Math.cos(angle) * 100;
-        const sunY = Math.sin(angle) * 100;
-        const sunZ = 30;
-
-        lightRef.current.position.set(
-            shipPosition.x + sunX,
-            shipPosition.y + sunY,
-            shipPosition.z + sunZ
-        );
-
-        lightRef.current.target.position.copy(shipPosition);
-        lightRef.current.target.updateMatrixWorld();
-    }
-  });
-
-  const cycle = Math.sin((timeOfDay / 24) * Math.PI);
-  const directionalIntensity = Math.max(0, cycle) * 2;
-  const ambientIntensity = Math.max(0.2, cycle * 1.5);
-  const rayleigh = Math.max(0, 2 - (timeOfDay > 6 && timeOfDay < 18 ? 0 : 10));
 
   return (
     <>
-      <Sky sunPosition={lightRef.current?.position} turbidity={10} rayleigh={rayleigh} />
+      {/* Leva로 제어되는 값들을 Sky 컴포넌트에 적용합니다. */}
+      <Sky 
+        turbidity={turbidity}
+        rayleigh={rayleigh}
+        mieCoefficient={0.005}
+        mieDirectionalG={0.7}
+        sunPosition={[100, 150, 50]}
+      />
+      
+      {/* Leva로 제어되는 주변광 설정 */}
       <ambientLight intensity={ambientIntensity} />
+
+      {/* Leva로 제어되는 주 광원(태양) 설정 */}
       <directionalLight 
-        ref={lightRef}
-        intensity={directionalIntensity}
-        castShadow 
-        shadow-mapSize-width={2048} 
-        shadow-mapSize-height={2048} 
-        shadow-camera-left={-50} 
-        shadow-camera-right={50} 
-        shadow-camera-top={50} 
-        shadow-camera-bottom={-50}
-        shadow-bias={-0.0001}
+        ref={lightRef} 
+        castShadow
+        intensity={1.5}
+        color={sunColor}
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-100}
+        shadow-camera-right={100}
+        shadow-camera-top={100}
+        shadow-camera-bottom={-100}
       />
     </>
   );
