@@ -1,10 +1,11 @@
 // 파일 경로: src/components/Environment.tsx (수정된 파일)
 
-import { useRef, useEffect } from 'react';
+
 import { useThree } from '@react-three/fiber';
 import { Sky } from '@react-three/drei';
 import * as THREE from 'three';
 import { useControls } from 'leva';
+import { useEffect } from 'react';
 
 // 하늘, 조명, 그림자를 모두 관리하는 컴포넌트
 export const Environment = ({ lightRef }: { lightRef: React.RefObject<THREE.DirectionalLight> }) => {
