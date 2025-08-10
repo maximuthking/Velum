@@ -7,8 +7,9 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import { shipHealthAtom, shipHealthPercentageAtom } from '../store/shipStore';
 import { RigidBody, CuboidCollider, RapierRigidBody } from '@react-three/rapier';
 import { useGLTF } from '@react-three/drei';
+import { socket } from './SocketManager'; // SocketManager에서 소켓 인스턴스 import
 
-// 키보드 입력을 관리하는 커스텀 훅 (변경 없음)
+// ... (useKeyboardControls, PlayerShipModel 컴포넌트는 이전과 동일) ...
 const useKeyboardControls = () => {
   const keys = useRef({ forward: false, backward: false, left: false, right: false });
   React.useEffect(() => {
@@ -38,13 +39,10 @@ const useKeyboardControls = () => {
   return keys;
 };
 
-// GLB 모델을 불러와 배의 외형을 담당하는 컴포넌트
 const PlayerShipModel = () => {
-  // 1. public 폴더에 있는 GLB 파일을 불러옵니다. 파일명이 다르면 경로를 수정해주세요.
   const { scene } = useGLTF('/ship.glb'); 
   const healthPercentage = useAtomValue(shipHealthPercentageAtom);
 
-  // 2. 불러온 모델의 모든 메시에 그림자 속성을 적용합니다.
   useEffect(() => {
     scene.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -56,15 +54,12 @@ const PlayerShipModel = () => {
 
   return (
     <group>
-        {/* 3. primitive를 사용해 불러온 모델을 렌더링합니다. */}
         <primitive 
           object={scene} 
-          scale={6.0} // 모델 크기를 키웠습니다.
-          rotation={[0, Math.PI, 0]} // 모델을 180도 회전시켜 앞뒤를 맞췄습니다.
+          scale={4.0}
+          rotation={[0, Math.PI, 0]}
           position={[0, -0.25, 0]} 
         />
-        
-        {/* 심각한 손상 시(30% 이하) 연기 파티클은 그대로 유지합니다. */}
         {healthPercentage <= 30 && (
           <mesh position={[0, 0.5, -1.5]}>
             <sphereGeometry args={[0.1, 8, 8]} />
@@ -75,6 +70,7 @@ const PlayerShipModel = () => {
   );
 };
 
+
 // 배 컴포넌트
 export const Ship = forwardRef<RapierRigidBody>((_props, ref) => {
   const controls = useKeyboardControls();
@@ -84,6 +80,7 @@ export const Ship = forwardRef<RapierRigidBody>((_props, ref) => {
     const shipRb = (ref as React.RefObject<RapierRigidBody>).current;
     if (!shipRb) return;
 
+    // ... (움직임 로직은 이전과 동일) ...
     const acceleration = 25.0;
     const maxSpeed = 5.0;
     const backwardMaxSpeed = 2.5;
@@ -125,6 +122,18 @@ export const Ship = forwardRef<RapierRigidBody>((_props, ref) => {
 
     shipRb.setLinvel({ x: currentVelocity.x, y: 0, z: currentVelocity.z }, true);
     shipRb.setAngvel({ x: 0, y: newAngvelY, z: 0 }, true);
+
+
+    // 서버로 내 위치 정보를 전송합니다.
+    if (socket && socket.connected) {
+      const position = shipRb.translation();
+      const rotation = shipRb.rotation();
+      socket.emit('playerMove', {
+        id: socket.id,
+        position: [position.x, position.y, position.z],
+        rotation: [rotation.x, rotation.y, rotation.z, rotation.w],
+      });
+    }
   });
 
   const handleCollision = (payload: any) => {
@@ -143,7 +152,6 @@ export const Ship = forwardRef<RapierRigidBody>((_props, ref) => {
       enabledRotations={[false, true, false]} 
     >
       <PlayerShipModel />
-      {/* 물리적 충돌 범위(Collider)는 모델의 크기에 맞게 조절해야 할 수 있습니다. */}
       <CuboidCollider args={[0.6, 0.3, 1.2]} />
     </RigidBody>
   );
