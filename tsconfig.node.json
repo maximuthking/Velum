@@ -9,7 +9,7 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    /* "allowImportingTsExtensions": true, 이 옵션은 noEmit이 필요하므로 제거합니다. */
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
 
