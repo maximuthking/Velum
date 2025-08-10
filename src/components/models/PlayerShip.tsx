@@ -1,8 +1,9 @@
-// 파일 경로: src/components/models/PlayerShip.tsx (수정된 파일)
+// 파일 경로: src/components/models/PlayerShip.tsx
 
 import * as THREE from 'three';
 import { useAtomValue } from 'jotai';
-import { shipHealthPercentageAtom } from '../../store/shipStore';
+// 잘못된 경로를 수정합니다.
+import { shipHealthPercentageAtom } from '../../store/stores';
 
 // 배의 외형을 담당하는 컴포넌트
 export const PlayerShipModel = () => {
