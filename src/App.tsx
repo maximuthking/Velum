@@ -17,6 +17,8 @@ import { Ocean } from './components/Water';
 import { Harbor } from './components/Harbor';
 import { HarborUI } from './components/ui/HarborUI';
 import { InventoryUI } from './components/ui/InventoryUI';
+import { SocketManager } from './components/SocketManager';
+import { OtherPlayers } from './components/OtherPlayers';
 
 // 낚시 시작 컨트롤러
 const FishingController = () => {
@@ -96,17 +98,11 @@ const Scene = () => {
     if (shipRef.current && controlsRef.current && lightRef.current) {
       const shipPosition = shipRef.current.translation();
       
-      // 카메라가 배를 따라다니도록 부드럽게 업데이트합니다.
       const offset = new THREE.Vector3().subVectors(state.camera.position, controlsRef.current.target);
-      const desiredTarget = new THREE.Vector3().copy(shipPosition);
-      
-      // 카메라의 타겟과 위치를 lerp를 이용해 부드럽게 이동시킵니다.
-      controlsRef.current.target.lerp(desiredTarget, 0.1);
-      state.camera.position.lerp(desiredTarget.add(offset), 0.1);
-      
+      controlsRef.current.target.copy(shipPosition);
+      state.camera.position.copy(shipPosition).add(offset);
       controlsRef.current.update();
 
-      // 광원이 배를 따라다니도록 업데이트
       lightRef.current.position.set(shipPosition.x + 100, shipPosition.y + 150, shipPosition.z + 50);
       lightRef.current.target.position.copy(shipPosition);
       lightRef.current.target.updateMatrixWorld();
@@ -134,6 +130,7 @@ const Scene = () => {
         <Ship ref={shipRef} />
         <World />
         <Harbor position={[-10, 0, -10]} />
+        <OtherPlayers />
 
         <Rock position={[0, 0, -20]} />
         <Rock position={[10, 0, -30]} />
@@ -159,10 +156,10 @@ const GameUI = () => {
   )
 }
 
-// 메인 App 컴포넌트
 function App() {
   return (
     <>
+      <SocketManager />
       <Canvas shadows camera={{ position: [0, 30, 30], fov: 50 }}>
         <Suspense fallback={null}>
           <Scene />
