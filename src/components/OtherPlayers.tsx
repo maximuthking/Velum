@@ -7,14 +7,11 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 
 // 다른 플레이어 한 명의 배를 렌더링하는 컴포넌트
-const OtherPlayer = ({ player }: { player: PlayerState }) => {
-  const { scene } = useGLTF('/ship.glb');
+const OtherPlayer = ({ player, scene }: { player: PlayerState, scene: THREE.Group }) => {
   const ref = useRef<THREE.Group>(null!);
 
-  // 각 인스턴스가 고유한 모델을 갖도록 scene을 복제합니다.
   const clonedScene = useMemo(() => {
     const cloned = scene.clone();
-    // 복제된 모델의 모든 메시에 그림자 속성을 적용합니다.
     cloned.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         child.castShadow = true;
@@ -36,12 +33,16 @@ const OtherPlayer = ({ player }: { player: PlayerState }) => {
   });
 
   return (
-    <primitive
-      ref={ref}
-      object={clonedScene} // 복제된 scene을 사용합니다.
-      scale={1.0}
-      rotation={[0, Math.PI, 0]}
-    />
+    // 이 그룹이 서버 데이터에 따라 움직입니다.
+    <group ref={ref}>
+      {/* 이 프리미티브는 크기와 방향을 바로잡는 역할만 합니다. */}
+      <primitive
+        object={clonedScene}
+        scale={4.0}
+        rotation={[0, Math.PI, 0]}
+        position={[0, -0.25, 0]}
+      />
+    </group>
   );
 };
 
@@ -49,11 +50,12 @@ const OtherPlayer = ({ player }: { player: PlayerState }) => {
 // 모든 다른 플레이어들을 렌더링하는 컴포넌트
 export const OtherPlayers = () => {
   const { players } = useMultiplayerStore();
+  const { scene } = useGLTF('/ship.glb');
 
   return (
     <>
       {Object.values(players).map((player) => (
-        <OtherPlayer key={player.id} player={player} />
+        <OtherPlayer key={player.id} player={player} scene={scene} />
       ))}
     </>
   );
