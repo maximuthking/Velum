@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useMultiplayerStore, type PlayerState } from '../store/multiplayerStore';
 
-const SERVER_URL = 'http://localhost:3001';
+const SERVER_URL = 'https://velum-server.onrender.com';
 
 export let socket: Socket;
 
