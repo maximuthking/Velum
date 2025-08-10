@@ -2,7 +2,7 @@
 
 import { atom } from 'jotai';
 import { create } from 'zustand';
-import { User } from 'firebase/auth';
+import type { User } from 'firebase/auth'; // 'type' 키워드 추가
 
 //================================//
 // Auth Store (Jotai)

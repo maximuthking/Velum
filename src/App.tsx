@@ -1,6 +1,6 @@
 // 파일 경로: src/App.tsx
 
-import React, { Suspense } from 'react';
+import { Suspense } from 'react'; // 사용하지 않는 React import 제거
 import { Canvas } from '@react-three/fiber';
 import { useAtomValue } from 'jotai';
 import { Leva } from 'leva';

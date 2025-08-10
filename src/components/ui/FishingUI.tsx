@@ -62,6 +62,7 @@ export const FishingUI = () => {
           
           const finalPos = indicatorPositionRef.current;
           
+          // 성공 여부 판정
           if (finalPos >= successZone.start && finalPos <= successZone.start + successZone.width) {
             const caughtFish = getRandomFish();
             setFishingResult(`잡았다! (${caughtFish.name})`);

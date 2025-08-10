@@ -11,13 +11,12 @@ export const PlayerUI = () => {
   const fishCount = useAtomValue(totalFishCountAtom);
   const nickname = useAtomValue(playerNicknameAtom);
 
-  // 로그아웃 처리 함수
   const handleLogout = async () => {
     try {
-      // TODO: 로그아웃 전 플레이어 데이터 저장 로직 추가
       await signOut(auth);
       console.log("Logged out successfully");
-    } catch (error)      console.error("Logout failed:", error);
+    } catch (error) { // 중괄호 {} 추가
+      console.error("Logout failed:", error);
     }
   };
 
