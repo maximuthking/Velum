@@ -1,3 +1,4 @@
+/* 파일 경로: src/components/ui/FishingUI.css */
 
 .fishing-ui-container {
   position: absolute;
@@ -40,4 +41,12 @@
   width: 4px;
   background-color: #f44336; /* Red */
   box-shadow: 0 0 5px #f44336;
+}
+
+.fishing-result-text {
+  color: white;
+  background: rgba(0,0,0,0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
 }

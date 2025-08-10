@@ -1,7 +1,7 @@
-// 파일 경로: src/components/OtherPlayers.tsx (수정된 파일)
+// 파일 경로: src/components/OtherPlayers.tsx
 
 import { useGLTF } from "@react-three/drei";
-import { useMultiplayerStore, type PlayerState } from "../store/multiplayerStore";
+import { useMultiplayerStore, type PlayerState } from "../store/stores";
 import * as THREE from 'three';
 import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
@@ -10,6 +10,7 @@ import { useFrame } from "@react-three/fiber";
 const OtherPlayer = ({ player, scene }: { player: PlayerState, scene: THREE.Group }) => {
   const ref = useRef<THREE.Group>(null!);
 
+  // GLTF 모델을 복제하여 각 플레이어마다 고유한 객체를 갖도록 합니다.
   const clonedScene = useMemo(() => {
     const cloned = scene.clone();
     cloned.traverse((child) => {
@@ -21,7 +22,7 @@ const OtherPlayer = ({ player, scene }: { player: PlayerState, scene: THREE.Grou
     return cloned;
   }, [scene]);
   
-  // 서버로부터 받은 위치로 부드럽게 이동하도록 보간합니다.
+  // 서버로부터 받은 위치로 부드럽게 이동하도록 보간(lerp/slerp)합니다.
   useFrame((_, delta) => {
     if (ref.current) {
       const targetPosition = new THREE.Vector3(...player.position);
@@ -33,9 +34,7 @@ const OtherPlayer = ({ player, scene }: { player: PlayerState, scene: THREE.Grou
   });
 
   return (
-    // 이 그룹이 서버 데이터에 따라 움직입니다.
     <group ref={ref}>
-      {/* 이 프리미티브는 크기와 방향을 바로잡는 역할만 합니다. */}
       <primitive
         object={clonedScene}
         scale={4.0}

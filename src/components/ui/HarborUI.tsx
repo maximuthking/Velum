@@ -1,12 +1,12 @@
-// 파일 경로: src/components/ui/HarborUI.tsx (수정된 파일)
+// 파일 경로: src/components/ui/HarborUI.tsx
 
-import { useAtom, useAtomValue } from 'jotai'; // useSetAtom 제거
-import { isInHarborAtom } from '../../store/gameStore';
-import { playerGoldAtom, fishInventoryAtom } from '../../store/playerStore';
-import { shipHealthAtom } from '../../store/shipStore';
-import { fishData } from '../../data/fishData';
-import './HarborUI.css';
 import { useState } from 'react';
+import { useAtom, useAtomValue } from 'jotai';
+import { isInHarborAtom } from '../../store/stores';
+import { playerGoldAtom, fishInventoryAtom } from '../../store/stores';
+import { shipHealthAtom } from '../../store/stores';
+import { fishData } from '../../data/gameData';
+import './HarborUI.css';
 
 export const HarborUI = () => {
   const isInHarbor = useAtomValue(isInHarborAtom);
@@ -15,11 +15,13 @@ export const HarborUI = () => {
   const [fishInventory, setFishInventory] = useAtom(fishInventoryAtom);
   const [message, setMessage] = useState('');
 
+  // 사용자에게 짧은 메시지를 보여주는 함수
   const showMessage = (msg: string) => {
     setMessage(msg);
     setTimeout(() => setMessage(''), 2000);
   };
 
+  // 배 수리 핸들러
   const handleRepair = () => {
     if (shipHealth === 100) {
       showMessage("이미 내구도가 최대입니다.");
@@ -35,6 +37,7 @@ export const HarborUI = () => {
     }
   };
 
+  // 물고기 판매 핸들러
   const handleSellFish = () => {
     if (fishInventory.size === 0) {
       showMessage("판매할 물고기가 없습니다.");

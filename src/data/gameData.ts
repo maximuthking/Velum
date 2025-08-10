@@ -1,13 +1,38 @@
-// 파일 경로: src/data/fishData.ts (새 파일)
+// 파일 경로: src/data/gameData.ts
 
-// 각 물고기의 속성을 정의하는 인터페이스
+//================================//
+// Ship Data
+//================================//
+export interface ShipStats {
+  acceleration: number;
+  maxSpeed: number;
+  backwardMaxSpeed: number;
+  rotationSpeed: number;
+  drag: number;
+  angularDrag: number;
+}
+
+export const shipData: Record<string, ShipStats> = {
+  // 기본 배의 성능 데이터
+  default: {
+    acceleration: 5.0,
+    maxSpeed: 3.0,
+    backwardMaxSpeed: 1.5,
+    rotationSpeed: 1.5,
+    drag: 0.97,
+    angularDrag: 0.95,
+  },
+};
+
+//================================//
+// Fish Data
+//================================//
 export interface Fish {
   name: string;
   value: number;
   rarity: 'common' | 'uncommon' | 'rare';
 }
 
-// 게임에 등장하는 모든 물고기의 목록
 export const fishData: Fish[] = [
   { name: '고등어', value: 10, rarity: 'common' },
   { name: '꽁치', value: 12, rarity: 'common' },
@@ -17,11 +42,8 @@ export const fishData: Fish[] = [
   { name: '다금바리', value: 150, rarity: 'rare' },
 ];
 
-// 낚시 성공 시 잡을 물고기를 무작위로 선택하는 함수
 export const getRandomFish = (): Fish => {
   const rand = Math.random();
-  // 희귀도에 따라 확률을 다르게 설정합니다.
-  // 70% 확률로 common, 25% 확률로 uncommon, 5% 확률로 rare
   if (rand < 0.05) {
     const rareFish = fishData.filter(f => f.rarity === 'rare');
     return rareFish[Math.floor(Math.random() * rareFish.length)];

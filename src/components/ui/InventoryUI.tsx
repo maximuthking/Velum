@@ -1,8 +1,8 @@
-// 파일 경로: src/components/ui/InventoryUI.tsx (새 파일)
+// 파일 경로: src/components/ui/InventoryUI.tsx
 
 import { useAtomValue } from 'jotai';
-import { isInventoryOpenAtom } from '../../store/gameStore';
-import { fishInventoryAtom } from '../../store/playerStore';
+import { isInventoryOpenAtom } from '../../store/stores';
+import { fishInventoryAtom } from '../../store/stores';
 import './InventoryUI.css';
 
 export const InventoryUI = () => {

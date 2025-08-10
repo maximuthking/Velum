@@ -1,4 +1,4 @@
-// 파일 경로: src/components/Harbor.tsx (새 파일)
+// 파일 경로: src/components/Harbor.tsx
 
 import { RigidBody } from '@react-three/rapier';
 import { InteractionZone } from './InteractionZone';

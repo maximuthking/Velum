@@ -1,10 +1,10 @@
-// 파일 경로: src/components/ui/FishingUI.tsx (수정된 파일)
+// 파일 경로: src/components/ui/FishingUI.tsx
 
 import { useState, useEffect, useRef } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
-import { isFishingAtom, fishingResultAtom } from '../../store/gameStore';
-import { fishInventoryAtom } from '../../store/playerStore';
-import { getRandomFish } from '../../data/fishData';
+import { isFishingAtom, fishingResultAtom } from '../../store/stores';
+import { fishInventoryAtom } from '../../store/stores';
+import { getRandomFish } from '../../data/gameData';
 import './FishingUI.css';
 
 export const FishingUI = () => {
@@ -18,11 +18,12 @@ export const FishingUI = () => {
   const indicatorPositionRef = useRef(0);
   const direction = useRef(1);
   const speed = 150;
-  const hasCaught = useRef(false); // 물고기를 잡았는지 여부를 체크하는 Ref
+  const hasCaught = useRef(false); // 중복 입력을 방지하기 위한 ref
 
   useEffect(() => {
     if (isFishing) {
       hasCaught.current = false; // 낚시 시작 시 초기화
+      // 성공 영역의 너비와 위치를 무작위로 설정
       const width = 50 + Math.random() * 50;
       const start = Math.random() * (400 - width);
       setSuccessZone({ start, width });
@@ -31,6 +32,7 @@ export const FishingUI = () => {
       indicatorPositionRef.current = 0;
       direction.current = 1;
 
+      // requestAnimationFrame을 사용한 부드러운 인디케이터 움직임
       let lastTime = 0;
       let animationFrameId: number;
       const animate = (time: number) => {
@@ -39,7 +41,7 @@ export const FishingUI = () => {
           setIndicatorPosition(prev => {
             let newPos = prev + direction.current * speed * deltaTime;
             if (newPos > 396 || newPos < 0) {
-              direction.current *= -1;
+              direction.current *= -1; // 방향 전환
               newPos = Math.max(0, Math.min(396, newPos));
             }
             indicatorPositionRef.current = newPos;
@@ -53,32 +55,26 @@ export const FishingUI = () => {
 
       const handleKeyPress = (e: KeyboardEvent) => {
         if (e.code === 'Space') {
-          // 이미 물고기를 잡았다면 더 이상 진행하지 않음
           if (hasCaught.current) return;
-          hasCaught.current = true; // 잡기 시도 시 즉시 잠금
+          hasCaught.current = true;
 
           cancelAnimationFrame(animationFrameId);
           
           const finalPos = indicatorPositionRef.current;
           
-          setSuccessZone(currentZone => {
-            if (finalPos >= currentZone.start && finalPos <= currentZone.start + currentZone.width) {
-              const caughtFish = getRandomFish();
-              setFishingResult(`잡았다! (${caughtFish.name})`);
-              setFishInventory(prevInventory => {
-                const newInventory = new Map(prevInventory);
-                const currentCount = newInventory.get(caughtFish.name) || 0;
-                newInventory.set(caughtFish.name, currentCount + 1);
-                return newInventory;
-              });
-              console.log(`낚시 성공! ${caughtFish.name} 1마리 획득!`);
-            } else {
-              setFishingResult('fail');
-              console.log("낚시 실패!");
-            }
-            setIsFishing(false);
-            return currentZone;
-          });
+          if (finalPos >= successZone.start && finalPos <= successZone.start + successZone.width) {
+            const caughtFish = getRandomFish();
+            setFishingResult(`잡았다! (${caughtFish.name})`);
+            setFishInventory(prevInventory => {
+              const newInventory = new Map(prevInventory);
+              const currentCount = newInventory.get(caughtFish.name) || 0;
+              newInventory.set(caughtFish.name, currentCount + 1);
+              return newInventory;
+            });
+          } else {
+            setFishingResult('fail');
+          }
+          setIsFishing(false);
         }
       };
 
@@ -88,7 +84,7 @@ export const FishingUI = () => {
         cancelAnimationFrame(animationFrameId);
       };
     }
-  }, [isFishing, setIsFishing, setFishingResult, setFishInventory]);
+  }, [isFishing, setIsFishing, setFishingResult, setFishInventory, successZone.start, successZone.width]);
 
   if (!isFishing) return null;
 

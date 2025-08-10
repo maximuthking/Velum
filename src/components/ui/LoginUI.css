@@ -1,0 +1,61 @@
+/* 파일 경로: src/components/ui/LoginUI.css */
+
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.login-container {
+  background-color: #2c3e50;
+  padding: 40px 50px;
+  border-radius: 15px;
+  text-align: center;
+  color: white;
+  font-family: 'Georgia', serif;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.login-container h1 {
+  margin: 0;
+  font-size: 48px;
+}
+
+.login-container p {
+  margin: 10px 0 30px 0;
+  font-size: 18px;
+  color: #bdc3c7;
+}
+
+.google-login-button {
+  background-color: #4285F4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: background-color 0.3s;
+}
+
+.google-login-button:hover {
+  background-color: #357ae8;
+}
+
+.google-login-button img {
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  padding: 2px;
+}

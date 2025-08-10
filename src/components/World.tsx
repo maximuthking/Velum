@@ -1,4 +1,4 @@
-// 파일 경로: src/components/World.tsx (새 파일)
+// 파일 경로: src/components/World.tsx
 
 import { CuboidCollider, RigidBody } from '@react-three/rapier';
 
